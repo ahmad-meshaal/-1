@@ -1,8 +1,11 @@
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق التبادل - زر إضافة عائم</title>
+    <title>تطبيق التبادل - مع توليد الصور</title>
+    <!-- مكتبة html2canvas لتوليد الصور -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         /* تنسيقات أساسية */
         * {
@@ -68,7 +71,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 1.5rem 1rem;
-            padding-bottom: 80px; /* مساحة للزر العائم */
+            padding-bottom: 80px;
         }
 
         /* قسم عرض المنتجات */
@@ -234,6 +237,16 @@
             border-radius: 20px;
         }
 
+        /* زر توليد الصور */
+        .generate-image-button {
+            background-color: #9c27b0;
+            color: white;
+        }
+
+        .generate-image-button:hover {
+            background-color: #7b1fa2;
+        }
+
         /* ========== زر الإضافة العائم ========== */
         .floating-add-btn {
             position: fixed;
@@ -264,46 +277,36 @@
             transform: scale(0.95);
         }
 
-        /* ========== نافذة الإضافة (المودال) ========== */
-        .add-modal {
+        /* ========== نافذة توليد الصور ========== */
+        .image-preview-modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
             justify-content: center;
             align-items: center;
             padding: 20px;
             animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
+        .image-preview-content {
             background-color: white;
             width: 100%;
             max-width: 500px;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.4s ease;
             max-height: 90vh;
             overflow-y: auto;
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #0066cc 0%, #004d99 100%);
+        .image-preview-header {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
             color: white;
             padding: 1.2rem 1.5rem;
             display: flex;
@@ -311,12 +314,12 @@
             align-items: center;
         }
 
-        .modal-title {
+        .image-preview-title {
             font-size: 1.4rem;
             font-weight: bold;
         }
 
-        .close-modal {
+        .close-image-modal {
             background: none;
             border: none;
             color: white;
@@ -331,83 +334,153 @@
             transition: background-color 0.2s;
         }
 
-        .close-modal:hover {
+        .close-image-modal:hover {
             background-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* نموذج الإضافة داخل المودال */
-        .product-form {
+        /* معاينة الصورة */
+        .image-preview-container {
             padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
+            text-align: center;
         }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #333;
-            font-size: 0.95rem;
-        }
-
-        .form-input,
-        .form-textarea,
-        .form-select {
-            padding: 0.8rem;
-            border: 1.5px solid #ddd;
+        .generated-image {
+            max-width: 100%;
             border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            border: 1px solid #eee;
         }
 
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: #0066cc;
-            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        .image-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-button {
-            background-color: #0066cc;
-            color: white;
-            border: none;
-            padding: 0.9rem 1.5rem;
+        .image-action-button {
+            padding: 0.8rem 1.5rem;
             border-radius: 8px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            border: none;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
-            margin-top: 0.5rem;
+            transition: all 0.2s;
         }
 
-        .form-button:hover {
-            background-color: #0052a3;
-            transform: translateY(-2px);
+        .download-button {
+            background-color: #4caf50;
+            color: white;
         }
 
-        /* الفوتر */
-        .app-footer {
+        .download-button:hover {
+            background-color: #3d8b40;
+        }
+
+        .share-button {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        .share-button:hover {
+            background-color: #0d8bf2;
+        }
+
+        /* تنسيق الصورة المتولدة */
+        .image-template {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 400px;
+            max-width: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-template::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><path d="M0,0 L100,100 M100,0 L0,100" stroke="white" stroke-width="1"/></svg>');
+        }
+
+        .image-header {
             text-align: center;
-            padding: 1.5rem 1rem;
-            color: #666;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .image-app-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .image-app-tagline {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .image-product-info {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .image-product-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .image-detail {
+            margin-bottom: 0.8rem;
+            display: flex;
+        }
+
+        .image-detail-label {
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .image-detail-value {
+            flex: 1;
+        }
+
+        .image-wanted-item {
+            background-color: rgba(255, 193, 7, 0.2);
+            border-right: 4px solid #ffc107;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .image-footer {
+            text-align: center;
             font-size: 0.9rem;
-            margin-top: 2rem;
-            border-top: 1px solid #e0e0e0;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         /* رسائل التنبيه */
@@ -472,11 +545,6 @@
                 padding: 1.2rem;
             }
             
-            .product-header {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
             .product-actions {
                 flex-direction: column;
             }
@@ -493,35 +561,14 @@
                 font-size: 1.6rem;
             }
             
-            .modal-content {
-                max-width: 95%;
-                margin: 10px;
+            .image-template {
+                width: 100%;
+                padding: 1.5rem;
             }
-        }
-
-        /* زر العودة للأعلى */
-        .scroll-top {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background-color: #0066cc;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            z-index: 999;
-            transition: all 0.3s;
-            font-size: 1.2rem;
-        }
-
-        .scroll-top:hover {
-            background-color: #004d99;
-            transform: scale(1.1);
+            
+            .image-actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -563,57 +610,64 @@
         +
     </button>
 
-    <!-- زر العودة للأعلى -->
-    <div class="scroll-top" id="scrollTopBtn" style="display: none;">↑</div>
-
-    <!-- نافذة إضافة منتج (مودال) -->
-    <div class="add-modal" id="addModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">إضافة منتج جديد للتبادل</h2>
-                <button class="close-modal" id="closeModalBtn">×</button>
+    <!-- نافذة معاينة وتحميل الصورة -->
+    <div class="image-preview-modal" id="imagePreviewModal">
+        <div class="image-preview-content">
+            <div class="image-preview-header">
+                <h2 class="image-preview-title">صورة المنتج للتبادل</h2>
+                <button class="close-image-modal" id="closeImageModalBtn">×</button>
             </div>
             
-            <form class="product-form" id="addProductForm">
-                <div class="form-group">
-                    <label class="form-label" for="productName">اسم المنتج:</label>
-                    <input type="text" class="form-input" id="productName" placeholder="مثال: تلفاز 32 بوصة" required>
+            <div class="image-preview-container">
+                <div id="imageTemplate" class="image-template" style="display: none;">
+                    <div class="image-header">
+                        <div class="image-app-name">تطبيق تبادل المنتجات</div>
+                        <div class="image-app-tagline">بدل مالا تحتاجه بالذي تحتاجه</div>
+                    </div>
+                    
+                    <div class="image-product-info">
+                        <div class="image-product-name" id="imgProductName">اسم المنتج</div>
+                        
+                        <div class="image-detail">
+                            <span class="image-detail-label">الوصف:</span>
+                            <span class="image-detail-value" id="imgProductDescription">وصف المنتج</span>
+                        </div>
+                        
+                        <div class="image-detail">
+                            <span class="image-detail-label">الفئة:</span>
+                            <span class="image-detail-value" id="imgProductCategory">فئة المنتج</span>
+                        </div>
+                        
+                        <div class="image-detail">
+                            <span class="image-detail-label">التاريخ:</span>
+                            <span class="image-detail-value" id="imgProductDate">تاريخ الإضافة</span>
+                        </div>
+                        
+                        <div class="image-wanted-item">
+                            <div style="font-weight: bold; margin-bottom: 0.5rem;">يريد تبديله بـ:</div>
+                            <div id="imgWantedItem">ما يريده بالمقابل</div>
+                        </div>
+                    </div>
+                    
+                    <div class="image-footer">
+                        للتواصل: <span id="imgContactNumber">رقم الهاتف</span> | تطبيق تبادل المنتجات
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label class="form-label" for="productDescription">وصف المنتج:</label>
-                    <textarea class="form-textarea" id="productDescription" placeholder="صف المنتج الذي تريد تبديله (الحالة، العمر، المواصفات)" required></textarea>
-                </div>
+                <img id="generatedImage" class="generated-image" alt="صورة المنتج للتبادل">
                 
-                <div class="form-group">
-                    <label class="form-label" for="wantedItem">ما تريد الحصول عليه:</label>
-                    <input type="text" class="form-input" id="wantedItem" placeholder="مثال: غسالة ملابس أو مبلغ نقدي" required>
+                <div class="image-actions">
+                    <button class="image-action-button download-button" id="downloadImageBtn">
+                        <span>📥</span>
+                        <span>تحميل الصورة</span>
+                    </button>
+                    
+                    <button class="image-action-button share-button" id="shareImageBtn">
+                        <span>📤</span>
+                        <span>مشاركة</span>
+                    </button>
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="contactNumber">رقم التواصل:</label>
-                    <input type="tel" class="form-input" id="contactNumber" placeholder="مثال: 05XXXXXXXX" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label" for="productCategory">فئة المنتج:</label>
-                    <select class="form-select" id="productCategory">
-                        <option value="electronics">الإلكترونيات</option>
-                        <option value="home">أدوات منزلية</option>
-                        <option value="clothing">ملابس وأحذية</option>
-                        <option value="furniture">أثاث</option>
-                        <option value="books">كتب ومراجع</option>
-                        <option value="sports">رياضة وترفيه</option>
-                        <option value="vehicles">مركبات وقطع غيار</option>
-                        <option value="other">أخرى</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="form-button">
-                    <span>إضافة المنتج للتبادل</span>
-                    <span>✓</span>
-                </button>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -622,6 +676,7 @@
         // ==================== المتغيرات الأساسية ====================
         let visitorCount = 0;
         let products = [];
+        let currentImageData = null;
 
         // ==================== تهيئة التطبيق عند التحميل ====================
         document.addEventListener('DOMContentLoaded', function() {
@@ -634,13 +689,8 @@
             // عرض المنتجات
             renderProducts();
             
-            // إعداد الأزرار والمودال
-            setupFloatingButton();
-            setupModal();
-            setupProductForm();
-            
-            // إعداد زر العودة للأعلى
-            setupScrollTopButton();
+            // إعداد الأزرار
+            setupEventListeners();
         });
 
         // ==================== وظيفة عداد الزوار ====================
@@ -765,13 +815,18 @@
                         
                         <div class="product-actions">
                             <button class="action-button contact-button" onclick="contactSeller('${product.contact}', '${product.name}')">
-                                <span>الاتصال للتبادل</span>
                                 <span>📞</span>
+                                <span>الاتصال</span>
+                            </button>
+                            
+                            <button class="action-button generate-image-button" onclick="generateProductImage(${product.id})">
+                                <span>🖼️</span>
+                                <span>توليد صورة</span>
                             </button>
                             
                             <button class="action-button delete-button" onclick="deleteProduct(${product.id})">
-                                <span>حذف المنتج</span>
                                 <span>🗑️</span>
+                                <span>حذف</span>
                             </button>
                             
                             <div class="action-button category-button">
@@ -786,222 +841,188 @@
             productsContainer.innerHTML = productsHTML;
         }
 
-        // ==================== إعداد زر الإضافة العائم ====================
-        function setupFloatingButton() {
-            const floatingBtn = document.getElementById('floatingAddBtn');
+        // ==================== وظيفة توليد صورة المنتج ====================
+        function generateProductImage(productId) {
+            const product = products.find(p => p.id === productId);
             
-            floatingBtn.addEventListener('click', function() {
-                // إظهار نافذة الإضافة
-                document.getElementById('addModal').style.display = 'flex';
+            if (!product) {
+                showAlert('لم يتم العثور على المنتج', 'error');
+                return;
+            }
+            
+            // تحديد اسم الفئة
+            let categoryName = 'أخرى';
+            switch(product.category) {
+                case 'electronics': categoryName = 'الإلكترونيات'; break;
+                case 'home': categoryName = 'أدوات منزلية'; break;
+                case 'clothing': categoryName = 'ملابس وأحذية'; break;
+                case 'furniture': categoryName = 'أثاث'; break;
+                case 'books': categoryName = 'كتب ومراجع'; break;
+                case 'sports': categoryName = 'رياضة وترفيه'; break;
+                case 'vehicles': categoryName = 'مركبات وقطع غيار'; break;
+                default: categoryName = 'أخرى';
+            }
+            
+            // تحديث بيانات القالب
+            document.getElementById('imgProductName').textContent = product.name;
+            document.getElementById('imgProductDescription').textContent = product.description;
+            document.getElementById('imgProductCategory').textContent = categoryName;
+            document.getElementById('imgProductDate').textContent = product.date;
+            document.getElementById('imgWantedItem').textContent = product.wantedItem;
+            document.getElementById('imgContactNumber').textContent = product.contact;
+            
+            // إظهار القالب
+            document.getElementById('imageTemplate').style.display = 'block';
+            
+            // توليد الصورة باستخدام html2canvas
+            html2canvas(document.getElementById('imageTemplate'), {
+                backgroundColor: null,
+                scale: 2, // لزيادة جودة الصورة
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                // إخفاء القالب
+                document.getElementById('imageTemplate').style.display = 'none';
                 
-                // إيقاف التمرير خلف المودال
+                // تحويل Canvas إلى صورة
+                const imageData = canvas.toDataURL('image/png');
+                document.getElementById('generatedImage').src = imageData;
+                
+                // حفظ بيانات الصورة
+                currentImageData = imageData;
+                
+                // إظهار نافذة المعاينة
+                document.getElementById('imagePreviewModal').style.display = 'flex';
                 document.body.style.overflow = 'hidden';
-                
-                // إعطاء التركيز على أول حقل إدخال
-                setTimeout(() => {
-                    document.getElementById('productName').focus();
-                }, 300);
+            }).catch(error => {
+                console.error('خطأ في توليد الصورة:', error);
+                showAlert('حدث خطأ في توليد الصورة', 'error');
             });
         }
 
-        // ==================== إعداد نافذة الإضافة (مودال) ====================
-        function setupModal() {
-            const modal = document.getElementById('addModal');
-            const closeBtn = document.getElementById('closeModalBtn');
+        // ==================== وظيفة تحميل الصورة ====================
+        function downloadImage() {
+            if (!currentImageData) {
+                showAlert('لا توجد صورة للتحميل', 'error');
+                return;
+            }
             
-            // زر الإغلاق
-            closeBtn.addEventListener('click', function() {
-                closeModal();
-            });
+            const link = document.createElement('a');
+            link.href = currentImageData;
+            link.download = `تبادل_${Date.now()}.png`;
+            link.click();
             
-            // إغلاق بالنقر خارج المودال
-            modal.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    closeModal();
-                }
-            });
-            
-            // إغلاق بالضغط على زر ESC
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape' && modal.style.display === 'flex') {
-                    closeModal();
-                }
-            });
+            showAlert('تم تحميل الصورة بنجاح', 'success');
         }
 
-        // ==================== وظيفة إغلاق المودال ====================
-        function closeModal() {
-            document.getElementById('addModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
+        // ==================== وظيفة مشاركة الصورة ====================
+        function shareImage() {
+            if (!currentImageData) {
+                showAlert('لا توجد صورة للمشاركة', 'error');
+                return;
+            }
             
-            // إعادة تعيين النموذج
-            document.getElementById('addProductForm').reset();
+            // تحويل dataURL إلى blob
+            fetch(currentImageData)
+                .then(res => res.blob())
+                .then(blob => {
+                    if (navigator.share) {
+                        // استخدم Web Share API إذا متاح
+                        const file = new File([blob], 'تبادل_منتج.png', { type: 'image/png' });
+                        
+                        navigator.share({
+                            files: [file],
+                            title: 'منتج للتبادل',
+                            text: 'اطلع على هذا المنتج المتاح للتبادل!'
+                        })
+                        .then(() => showAlert('تم المشاركة بنجاح', 'success'))
+                        .catch(error => {
+                            console.error('خطأ في المشاركة:', error);
+                            showAlert('حدث خطأ في المشاركة', 'error');
+                        });
+                    } else {
+                        // البديل: نسخ الرابط
+                        navigator.clipboard.writeText('اطلع على هذا المنتج للتبادل!')
+                            .then(() => showAlert('تم نسخ رسالة المشاركة للحافظة', 'info'));
+                    }
+                })
+                .catch(error => {
+                    console.error('خطأ في تحويل الصورة:', error);
+                    showAlert('حدث خطأ في تحضير الصورة للمشاركة', 'error');
+                });
         }
 
-        // ==================== وظيفة إعداد نموذج إضافة المنتج ====================
-        function setupProductForm() {
-            const form = document.getElementById('addProductForm');
-            
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                
-                // الحصول على القيم من النموذج
-                const productName = document.getElementById('productName').value.trim();
-                const productDescription = document.getElementById('productDescription').value.trim();
-                const wantedItem = document.getElementById('wantedItem').value.trim();
-                const contactNumber = document.getElementById('contactNumber').value.trim();
-                const productCategory = document.getElementById('productCategory').value;
-                
-                // التحقق من صحة البيانات
-                if (!productName || !productDescription || !wantedItem || !contactNumber) {
-                    showAlert('يرجى ملء جميع الحقول المطلوبة', 'error');
-                    return;
-                }
-                
-                // التحقق من رقم الهاتف
-                const phoneRegex = /^[0-9]{10,15}$/;
-                if (!phoneRegex.test(contactNumber.replace(/\D/g, ''))) {
-                    showAlert('يرجى إدخال رقم هاتف صحيح (10-15 رقم)', 'error');
-                    return;
-                }
-                
-                // إنشاء كائن المنتج الجديد
-                const newProduct = {
-                    id: Date.now(),
-                    name: productName,
-                    description: productDescription,
-                    wantedItem: wantedItem,
-                    contact: contactNumber,
-                    category: productCategory,
-                    date: getCurrentDate()
-                };
-                
-                // إضافة المنتج للمصفوفة
-                products.push(newProduct);
-                
-                // حفظ المنتجات في التخزين المحلي
-                if (saveProducts()) {
-                    // إغلاق المودال
-                    closeModal();
-                    
-                    // تحديث عرض المنتجات
-                    renderProducts();
-                    
-                    // إظهار رسالة نجاح
-                    showAlert('تم إضافة منتجك بنجاح! سيتمكن الآخرون من رؤيته والاتصال بك للتبادل.', 'success');
-                    
-                    // التمرير إلى قائمة المنتجات
-                    document.querySelector('.products-section').scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        }
-
-        // ==================== وظيفة حذف المنتج ====================
+        // ==================== وظائف أخرى ====================
         function deleteProduct(productId) {
             if (confirm('هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.')) {
-                // البحث عن المنتج وحذفه
-                const initialLength = products.length;
                 products = products.filter(product => product.id !== productId);
                 
-                // إذا تم الحذف بنجاح
-                if (products.length < initialLength) {
-                    // حفظ التغييرات
-                    if (saveProducts()) {
-                        // تحديث العرض
-                        renderProducts();
-                        
-                        // إظهار رسالة نجاح
-                        showAlert('تم حذف المنتج بنجاح', 'success');
-                    }
-                } else {
-                    showAlert('لم يتم العثور على المنتج المطلوب', 'error');
+                if (saveProducts()) {
+                    renderProducts();
+                    showAlert('تم حذف المنتج بنجاح', 'success');
                 }
             }
         }
 
-        // ==================== وظيفة الاتصال بالبائع ====================
         function contactSeller(phoneNumber, productName) {
             const message = `أهلاً، أنا مهتم بمنتج "${productName}" الذي عرضته للتبادل. هل لا يزال متاحاً؟`;
             
-            if (confirm(`هل تريد نسخ رسالة جاهزة للتواصل مع صاحب المنتج؟\n\nالرسالة:\n"${message}"`)) {
-                // نسخ الرسالة إلى الحافظة
-                copyToClipboard(message);
-                
-                showAlert('تم نسخ رسالة جاهزة للحافظة. يمكنك لصقها في أي تطبيق مراسلة.', 'info');
-                
-                // فتح رابط واتساب مع الرسالة (اختياري)
-                setTimeout(() => {
-                    const whatsappLink = `https://wa.me/${phoneNumber.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-                    window.open(whatsappLink, '_blank');
-                }, 1500);
-            } else {
-                // عرض رقم الهاتف فقط
-                alert(`رقم التواصل للتبادل:\n${phoneNumber}\n\nيمكنك نسخ الرقم للتواصل مباشرة.`);
+            if (confirm(`هل تريد نسخ رسالة جاهزة للتواصل؟\n\n"${message}"`)) {
+                navigator.clipboard.writeText(message)
+                    .then(() => showAlert('تم نسخ الرسالة للحافظة', 'info'));
             }
         }
 
-        // ==================== وظائف مساعدة ====================
-        
-        // الحصول على التاريخ الحالي بصيغة عربية
-        function getCurrentDate() {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return now.toLocaleDateString('ar-SA', options);
-        }
-        
-        // إظهار رسالة تنبيه
         function showAlert(message, type = 'info') {
-            // إنصراف العنصر إذا كان موجوداً
             const existingAlert = document.querySelector('.alert-message');
-            if (existingAlert) {
-                existingAlert.remove();
-            }
+            if (existingAlert) existingAlert.remove();
             
-            // إنشاء عنصر الرسالة
             const alertElement = document.createElement('div');
             alertElement.className = `alert-message alert-${type}`;
             alertElement.textContent = message;
-            
-            // إضافة العنصر إلى الصفحة
             document.body.appendChild(alertElement);
             
-            // إزالة الرسالة بعد 3 ثوانٍ
             setTimeout(() => {
-                if (alertElement.parentNode) {
-                    alertElement.remove();
-                }
+                if (alertElement.parentNode) alertElement.remove();
             }, 3000);
         }
-        
-        // نسخ النص إلى الحافظة
-        function copyToClipboard(text) {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-        }
-        
-        // إعداد زر العودة للأعلى
-        function setupScrollTopButton() {
-            const scrollButton = document.getElementById('scrollTopBtn');
+
+        // ==================== إعداد الأحداث ====================
+        function setupEventListeners() {
+            // زر الإضافة العائم
+            document.getElementById('floatingAddBtn').addEventListener('click', function() {
+                alert('زر إضافة منتج جديد - يمكنك إضافة نموذج الإضافة هنا');
+            });
             
-            // إظهار/إخفاء الزر عند التمرير
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 300) {
-                    scrollButton.style.display = 'flex';
-                } else {
-                    scrollButton.style.display = 'none';
+            // إغلاق نافذة الصورة
+            document.getElementById('closeImageModalBtn').addEventListener('click', function() {
+                document.getElementById('imagePreviewModal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            });
+            
+            // إغلاق نافذة الصورة بالنقر خارجها
+            document.getElementById('imagePreviewModal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.style.display = 'none';
+                    document.body.style.overflow = 'auto';
                 }
             });
             
-            // التمرير إلى الأعلى عند النقر
-            scrollButton.addEventListener('click', function() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+            // زر تحميل الصورة
+            document.getElementById('downloadImageBtn').addEventListener('click', downloadImage);
+            
+            // زر مشاركة الصورة
+            document.getElementById('shareImageBtn').addEventListener('click', shareImage);
+            
+            // إغلاق بالضغط على ESC
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    const imageModal = document.getElementById('imagePreviewModal');
+                    if (imageModal.style.display === 'flex') {
+                        imageModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                }
             });
         }
     </script>
