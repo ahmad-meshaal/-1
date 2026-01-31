@@ -19,15 +19,12 @@
         html, body {
             width: 100%;
             height: 100%;
-            overflow-x: hidden;
         }
         
         body {
             background: linear-gradient(135deg, #f8fff8 0%, #e8f5e9 100%);
             color: #2c3e50;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
         
         .header {
@@ -39,7 +36,6 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            flex-shrink: 0;
         }
         
         .header h1 {
@@ -67,13 +63,11 @@
         }
         
         .container {
-            flex: 1;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
             padding-bottom: 120px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
+            width: 100%;
         }
         
         .add-btn {
@@ -106,7 +100,6 @@
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 30px;
             margin-top: 40px;
-            width: 100%;
         }
         
         .product-card {
@@ -118,11 +111,6 @@
             cursor: pointer;
             border: 2px solid transparent;
             position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 450px;
-            display: flex;
-            flex-direction: column;
         }
         
         .product-card:hover {
@@ -142,7 +130,6 @@
             font-size: 70px;
             position: relative;
             overflow: hidden;
-            flex-shrink: 0;
         }
         
         .product-image img {
@@ -180,9 +167,6 @@
         
         .product-content {
             padding: 25px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
         }
         
         .product-name {
@@ -200,11 +184,7 @@
             margin-bottom: 20px;
             line-height: 1.6;
             font-size: 1rem;
-            flex: 1;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
+            min-height: 60px;
         }
         
         .wanted-item {
@@ -219,7 +199,6 @@
             align-items: center;
             gap: 12px;
             font-size: 1.05rem;
-            flex-shrink: 0;
         }
         
         .product-contact {
@@ -235,7 +214,6 @@
             background: #e3f2fd;
             padding: 12px;
             border-radius: 10px;
-            flex-shrink: 0;
         }
         
         .product-meta {
@@ -245,7 +223,6 @@
             margin-top: 25px;
             padding-top: 20px;
             border-top: 2px solid #f0f0f0;
-            flex-shrink: 0;
         }
         
         .product-date {
@@ -285,7 +262,6 @@
             transition: all 0.3s;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            flex-shrink: 0;
         }
         
         .delete-btn:hover {
@@ -323,8 +299,6 @@
             animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 2px solid #4CAF50;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            max-height: 90vh;
-            overflow-y: auto;
         }
         
         @keyframes modalSlideUp {
@@ -485,7 +459,6 @@
             border-radius: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             margin-top: 60px;
-            width: 100%;
         }
         
         .empty-icon {
@@ -520,7 +493,6 @@
             text-align: center;
             padding: 80px 30px;
             color: #666;
-            width: 100%;
         }
         
         .loading-spinner {
@@ -731,62 +703,6 @@
             transform: rotate(90deg);
         }
         
-        /* Full Screen Layout */
-        .full-height {
-            height: 100vh;
-            height: calc(var(--vh, 1vh) * 100);
-        }
-        
-        .full-width {
-            width: 100vw;
-        }
-        
-        .mobile-optimized {
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-        }
-        
-        /* Prevent horizontal scroll */
-        .no-horizontal-scroll {
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        
-        /* Safe area insets for modern phones */
-        .safe-area {
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        
-        /* Landscape optimization */
-        @media (orientation: landscape) and (max-height: 500px) {
-            .product-image {
-                height: 180px;
-            }
-            
-            .product-card {
-                min-height: 380px;
-            }
-            
-            .modal-content {
-                max-height: 80vh;
-                margin: 30px auto;
-            }
-        }
-        
-        /* Large screens */
-        @media (min-width: 1400px) {
-            .container {
-                max-width: 1400px;
-            }
-            
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            }
-        }
-        
-        /* Small screens */
         @media (max-width: 768px) {
             .products-grid {
                 grid-template-columns: 1fr;
@@ -794,8 +710,8 @@
             }
             
             .container {
-                padding: 15px;
-                margin: 0;
+                padding: 0 15px;
+                margin: 20px auto;
             }
             
             .add-btn {
@@ -804,7 +720,6 @@
                 width: 65px;
                 height: 65px;
                 font-size: 35px;
-                bottom: max(20px, env(safe-area-inset-bottom, 20px));
             }
             
             .header h1 {
@@ -812,9 +727,8 @@
             }
             
             .modal-content {
-                margin: 20px auto;
+                margin: 30px auto;
                 padding: 25px;
-                max-height: 85vh;
             }
             
             .sync-status,
@@ -834,20 +748,11 @@
             .image-modal-description {
                 font-size: 1rem;
             }
-            
-            .header {
-                padding: 20px 15px;
-            }
-            
-            .product-card {
-                min-height: 400px;
-            }
         }
         
-        /* Very small screens */
         @media (max-width: 480px) {
             .header {
-                padding: 15px 10px;
+                padding: 20px 15px;
             }
             
             .product-name {
@@ -869,35 +774,6 @@
                 height: 50px;
                 font-size: 30px;
             }
-            
-            .product-card {
-                min-height: 380px;
-            }
-            
-            .product-image {
-                height: 180px;
-            }
-        }
-        
-        /* Extra small screens */
-        @media (max-width: 360px) {
-            .product-card {
-                min-height: 350px;
-            }
-            
-            .product-image {
-                height: 150px;
-            }
-            
-            .product-content {
-                padding: 15px;
-            }
-            
-            .wanted-item,
-            .product-contact {
-                font-size: 0.95rem;
-                padding: 10px 15px;
-            }
         }
         
         /* Animation for new products */
@@ -918,7 +794,7 @@
         
         /* Custom scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
         
         ::-webkit-scrollbar-track {
@@ -936,7 +812,7 @@
         }
     </style>
 </head>
-<body class="mobile-optimized no-horizontal-scroll">
+<body>
     <!-- الهيدر -->
     <div class="header">
         <h1>🔄 موقع تبادل</h1>
@@ -945,7 +821,7 @@
     </div>
     
     <!-- المحتوى الرئيسي -->
-    <div class="container" id="mainContainer">
+    <div class="container">
         <div id="productsContainer">
             <div class="loading">
                 <div class="loading-spinner"></div>
@@ -1040,36 +916,6 @@
     </div>
 
     <script>
-        // ==================== إعدادات دعم الشاشة الكاملة ====================
-        function setFullScreenHeight() {
-            // ضبط ارتفاع 100vh للشاشات الحديثة
-            let vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-            
-            // ضبط ارتفاع العناصر الرئيسية
-            const container = document.getElementById('mainContainer');
-            if (container) {
-                const headerHeight = document.querySelector('.header').offsetHeight;
-                const availableHeight = window.innerHeight - headerHeight;
-                container.style.maxHeight = `${availableHeight}px`;
-            }
-        }
-        
-        // استدعاء الدالة عند التحميل وتغيير الحجم
-        window.addEventListener('load', setFullScreenHeight);
-        window.addEventListener('resize', setFullScreenHeight);
-        window.addEventListener('orientationchange', setFullScreenHeight);
-        
-        // منع التكبير عند النقر المزدوج على الهواتف
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
-        
         // ==================== إعدادات الربط السحابي ====================
         const firebaseConfig = {
             apiKey: "AIzaSyBm3ntKgHxFrBxbBBduwgmTiliTyCQuDIg",
@@ -1098,9 +944,6 @@
         // ==================== تهيئة التطبيق ====================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🔥 Firebase initialized successfully!');
-            
-            // ضبط الشاشة الكاملة
-            setFullScreenHeight();
             
             // توليد معرف الجهاز
             generateDeviceId();
@@ -1632,27 +1475,23 @@
             // فتح النافذة
             document.getElementById('imageModal').style.display = 'block';
             document.body.style.overflow = 'hidden';
-            setFullScreenHeight();
         };
         
         function closeImageModal() {
             document.getElementById('imageModal').style.display = 'none';
             document.body.style.overflow = 'auto';
-            setFullScreenHeight();
         }
         
         // ==================== دوال التحكم ====================
         function openAddModal() {
             document.getElementById('addModal').style.display = 'block';
             document.body.style.overflow = 'hidden';
-            setFullScreenHeight();
         }
         
         function closeAddModal() {
             document.getElementById('addModal').style.display = 'none';
             document.body.style.overflow = 'auto';
             resetForm();
-            setFullScreenHeight();
         }
         
         function resetForm() {
