@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +6,7 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
     <style>
         * {
@@ -126,6 +126,18 @@
             overflow: hidden;
         }
         
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-image img:hover {
+            transform: scale(1.05);
+        }
+        
         .product-image::before {
             content: '';
             position: absolute;
@@ -135,6 +147,11 @@
             bottom: 0;
             background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
             animation: shimmer 2s infinite;
+            display: none;
+        }
+        
+        .product-image.no-image::before {
+            display: block;
         }
         
         @keyframes shimmer {
@@ -331,6 +348,34 @@
             height: 140px;
             resize: vertical;
             line-height: 1.6;
+        }
+        
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #4CAF50;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            background: #f8fff8;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+        
+        .image-preview.no-image {
+            flex-direction: column;
+            gap: 15px;
+            color: #666;
+            font-weight: 500;
         }
         
         .submit-btn {
@@ -531,6 +576,127 @@
             box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
         }
         
+        /* Modal صورة المنتج */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            z-index: 3000;
+            overflow: hidden;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        .image-modal-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .image-modal-img {
+            max-width: 90%;
+            max-height: 70%;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            animation: imageZoomIn 0.5s ease;
+        }
+        
+        @keyframes imageZoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .image-modal-details {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            animation: slideUp 0.5s ease 0.2s both;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .image-modal-name {
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 800;
+        }
+        
+        .image-modal-description {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .image-modal-contact {
+            color: #4CAF50;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            direction: ltr;
+            margin: 20px 0;
+            background: rgba(76, 175, 80, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid rgba(76, 175, 80, 0.3);
+        }
+        
+        .image-modal-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 40px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .image-modal-close:hover {
+            background: #4CAF50;
+            transform: rotate(90deg);
+        }
+        
         @media (max-width: 768px) {
             .products-grid {
                 grid-template-columns: 1fr;
@@ -563,6 +729,19 @@
             .device-info {
                 display: none;
             }
+            
+            .image-modal-img {
+                max-width: 95%;
+                max-height: 50%;
+            }
+            
+            .image-modal-name {
+                font-size: 1.5rem;
+            }
+            
+            .image-modal-description {
+                font-size: 1rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -580,6 +759,14 @@
             
             .empty-text {
                 font-size: 1.5rem;
+            }
+            
+            .image-modal-close {
+                top: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+                font-size: 30px;
             }
         }
         
@@ -656,6 +843,16 @@
                 </div>
                 
                 <div class="form-group">
+                    <label><span>📸</span> صورة المنتج (اختياري)</label>
+                    <input type="file" id="productImage" accept="image/*" capture="environment">
+                    <div class="image-preview no-image" id="imagePreview">
+                        <span>📷</span>
+                        <span>لم يتم اختيار صورة</span>
+                        <img id="previewImage" alt="معاينة الصورة">
+                    </div>
+                </div>
+                
+                <div class="form-group">
                     <label><span>📄</span> وصف المنتج</label>
                     <textarea id="productDescription" placeholder="صف حالة المنتج ومواصفاته بالتفصيل..." required></textarea>
                 </div>
@@ -690,6 +887,17 @@
         </div>
     </div>
 
+    <!-- Modal لعرض صورة المنتج -->
+    <div class="image-modal" id="imageModal">
+        <button class="image-modal-close" id="closeImageModal">×</button>
+        <div class="image-modal-content">
+            <img class="image-modal-img" id="modalImage" alt="صورة المنتج">
+            <div class="image-modal-details" id="imageModalDetails">
+                <!-- سيتم ملؤها بالجافاسكريبت -->
+            </div>
+        </div>
+    </div>
+
     <!-- حالة الاتصال -->
     <div class="sync-status" id="syncStatus">
         <span class="online-indicator"></span>
@@ -717,6 +925,7 @@
         // تشغيل النظام السحابي
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const storage = firebase.storage();
         
         // ==================== المتغيرات الأساسية ====================
         let products = [];
@@ -724,6 +933,7 @@
         let userDeviceId = null;
         let isOnline = true;
         let isInitialized = false;
+        let selectedImageFile = null;
         
         // ==================== تهيئة التطبيق ====================
         document.addEventListener('DOMContentLoaded', function() {
@@ -738,39 +948,9 @@
             // مراقبة الاتصال
             monitorConnection();
             
-            // حذف جميع المنتجات والبدء من جديد
-            resetDatabase();
+            // تحميل البيانات
+            initializeApp();
         });
-        
-        // ==================== حذف جميع المنتجات وبدء جديد ====================
-        async function resetDatabase() {
-            try {
-                console.log('🔄 Resetting database...');
-                
-                // حذف جميع المنتجات
-                await database.ref('products').remove();
-                
-                // إعادة تعيين عداد الزوار
-                await database.ref('visitorCount').set(0);
-                
-                // تحديث العرض
-                visitorCount = 0;
-                document.getElementById('visitorCount').textContent = '0';
-                
-                products = [];
-                showEmptyState();
-                
-                console.log('✅ Database reset successfully!');
-                
-                // الآن تهيئة التطبيق
-                initializeApp();
-                
-            } catch (error) {
-                console.error('❌ Error resetting database:', error);
-                showMessage('⚠️ حدث خطأ في إعادة تعيين قاعدة البيانات', 'warning');
-                initializeApp();
-            }
-        }
         
         // ==================== توليد معرف الجهاز ====================
         function generateDeviceId() {
@@ -947,9 +1127,63 @@
             });
         }
         
-        // ==================== إضافة منتج جديد ====================
-        async function addProduct(productData) {
+        // ==================== رفع صورة إلى Firebase Storage ====================
+        async function uploadImage(file, productId) {
+            if (!file) return null;
+            
             try {
+                // إنشاء اسم فريد للصورة
+                const fileName = `product_${productId}_${Date.now()}_${file.name}`;
+                const storageRef = storage.ref(`product_images/${fileName}`);
+                
+                // رفع الصورة
+                const uploadTask = storageRef.put(file);
+                
+                // انتظار اكتمال الرفع
+                await new Promise((resolve, reject) => {
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            // يمكن إضافة شريط تقدم هنا
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            console.log(`📤 Upload is ${progress}% done`);
+                        },
+                        (error) => {
+                            reject(error);
+                        },
+                        async () => {
+                            // الحصول على رابط التنزيل
+                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                            resolve(downloadURL);
+                        }
+                    );
+                });
+                
+                // الحصول على رابط الصورة
+                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                console.log('✅ Image uploaded:', downloadURL);
+                return downloadURL;
+                
+            } catch (error) {
+                console.error('❌ Error uploading image:', error);
+                showMessage('⚠️ حدث خطأ في رفع الصورة، سيتم إضافة المنتج بدون صورة', 'warning');
+                return null;
+            }
+        }
+        
+        // ==================== إضافة منتج جديد ====================
+        async function addProduct(productData, imageFile) {
+            try {
+                // إنشاء معرف المنتج أولاً
+                const newProductRef = database.ref('products').push();
+                const productId = newProductRef.key;
+                
+                let imageUrl = null;
+                
+                // رفع الصورة إذا وجدت
+                if (imageFile) {
+                    imageUrl = await uploadImage(imageFile, productId);
+                }
+                
                 const productWithMeta = {
                     ...productData,
                     deviceId: userDeviceId,
@@ -958,13 +1192,19 @@
                     timestamp: Date.now()
                 };
                 
-                const newProductRef = database.ref('products').push();
+                // إضافة رابط الصورة إذا تم رفعها
+                if (imageUrl) {
+                    productWithMeta.imageUrl = imageUrl;
+                }
+                
+                // حفظ المنتج في قاعدة البيانات
                 await newProductRef.set(productWithMeta);
                 
                 // إضافة معرف المنتج
-                productWithMeta.id = newProductRef.key;
+                productWithMeta.id = productId;
                 
                 console.log('✅ Product added:', productWithMeta.name);
+                if (imageUrl) console.log('📸 With image:', imageUrl);
                 
                 // عرض رسالة نجاح
                 showMessage(`🎉 تم إضافة "${productData.name}" بنجاح!`, 'success');
@@ -981,7 +1221,24 @@
         // ==================== حذف منتج ====================
         async function deleteProduct(productId) {
             try {
+                // حذف المنتج من قاعدة البيانات
                 await database.ref('products/' + productId).remove();
+                
+                // حذف الصورة من Storage إذا وجدت
+                const product = products.find(p => p.id === productId);
+                if (product && product.imageUrl) {
+                    try {
+                        // استخراج اسم الملف من الرابط
+                        const imageUrl = product.imageUrl;
+                        const fileName = imageUrl.split('/').pop().split('?')[0];
+                        const imageRef = storage.ref(`product_images/${fileName}`);
+                        await imageRef.delete();
+                        console.log('🗑️ Image deleted:', fileName);
+                    } catch (imageError) {
+                        console.warn('⚠️ Could not delete image:', imageError);
+                    }
+                }
+                
                 console.log('🗑️ Product deleted:', productId);
                 return true;
             } catch (error) {
@@ -1002,6 +1259,40 @@
             document.getElementById('addModal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeAddModal();
+                }
+            });
+            
+            // معاينة الصورة
+            document.getElementById('productImage').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    selectedImageFile = file;
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('previewImage');
+                        const previewContainer = document.getElementById('imagePreview');
+                        
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        previewContainer.classList.remove('no-image');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    selectedImageFile = null;
+                    const preview = document.getElementById('previewImage');
+                    const previewContainer = document.getElementById('imagePreview');
+                    
+                    preview.src = '';
+                    preview.style.display = 'none';
+                    previewContainer.classList.add('no-image');
+                }
+            });
+            
+            // إغلاق نافذة الصورة
+            document.getElementById('closeImageModal').addEventListener('click', closeImageModal);
+            document.getElementById('imageModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeImageModal();
                 }
             });
             
@@ -1037,7 +1328,7 @@
                 };
                 
                 // إضافة المنتج
-                const success = await addProduct(productData);
+                const success = await addProduct(productData, selectedImageFile);
                 
                 if (success) {
                     showMessage(`🎉 تم إضافة "${productName}" بنجاح!`, 'success');
@@ -1066,15 +1357,21 @@
                 const dateText = product.date || formatDate(new Date(product.createdAt || product.timestamp));
                 const categoryIcon = getCategoryIcon(product.category);
                 
+                // تحديد ما إذا كان هناك صورة
+                const hasImage = product.imageUrl;
+                const imageContent = hasImage ? 
+                    `<img src="${product.imageUrl}" alt="${product.name}" onclick="showProductImage('${product.id}')">` : 
+                    categoryIcon;
+                
                 html += `
-                    <div class="product-card new-product">
+                    <div class="product-card new-product" onclick="showProductImage('${product.id}')">
                         ${isUserProduct ? 
                             '<div class="my-product-badge">✨ منتجك</div>' : 
                             ''
                         }
                         
-                        <div class="product-image">
-                            ${categoryIcon}
+                        <div class="product-image ${!hasImage ? 'no-image' : ''}">
+                            ${imageContent}
                         </div>
                         
                         <div class="product-content">
@@ -1111,6 +1408,70 @@
             container.innerHTML = html;
         }
         
+        // ==================== عرض صورة المنتج بالتفاصيل ====================
+        window.showProductImage = function(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const modalImage = document.getElementById('modalImage');
+            const modalDetails = document.getElementById('imageModalDetails');
+            
+            // تعيين الصورة أو أيقونة بديلة
+            if (product.imageUrl) {
+                modalImage.src = product.imageUrl;
+                modalImage.style.display = 'block';
+            } else {
+                modalImage.style.display = 'none';
+            }
+            
+            // تعيين التفاصيل
+            const categoryText = getCategoryText(product.category);
+            const dateText = product.date || formatDate(new Date(product.createdAt));
+            
+            modalDetails.innerHTML = `
+                <h2 class="image-modal-name">${product.name}</h2>
+                <p class="image-modal-description">${product.description}</p>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; margin: 15px 0; border-right: 5px solid #4CAF50;">
+                    <div style="display: flex; align-items: center; gap: 10px; color: #4CAF50; font-size: 1.2rem; font-weight: bold;">
+                        <span>🔄</span>
+                        <span>يريد تبديله بـ: ${product.wantedItem}</span>
+                    </div>
+                </div>
+                
+                <div class="image-modal-contact">
+                    <span>📞</span> ${product.contact}
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 25px; color: rgba(255,255,255,0.8);">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>🏷️</span>
+                        <span>${categoryText}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>📅</span>
+                        <span>${dateText}</span>
+                    </div>
+                </div>
+                
+                ${!product.imageUrl ? 
+                    `<div style="text-align: center; margin-top: 20px; color: rgba(255,255,255,0.6);">
+                        📷 هذا المنتج لا يحتوي على صورة
+                    </div>` : 
+                    ''
+                }
+            `;
+            
+            // فتح النافذة
+            document.getElementById('imageModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        };
+        
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
         // ==================== دوال التحكم ====================
         function openAddModal() {
             document.getElementById('addModal').style.display = 'block';
@@ -1120,10 +1481,18 @@
         function closeAddModal() {
             document.getElementById('addModal').style.display = 'none';
             document.body.style.overflow = 'auto';
+            resetForm();
         }
         
         function resetForm() {
             document.getElementById('productForm').reset();
+            selectedImageFile = null;
+            const preview = document.getElementById('previewImage');
+            const previewContainer = document.getElementById('imagePreview');
+            
+            preview.src = '';
+            preview.style.display = 'none';
+            previewContainer.classList.add('no-image');
         }
         
         // ==================== دوال مساعدة ====================
@@ -1218,41 +1587,6 @@
         }
         
         // ==================== دوال عامة ====================
-        window.showProductDetails = function(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
-            
-            const message = `
-                📦 **${product.name}**
-                
-                ${product.description}
-                
-                🔄 **يريد تبديله بـ:** ${product.wantedItem}
-                
-                📞 **رقم التواصل:** ${product.contact}
-                
-                🏷️ **الفئة:** ${getCategoryText(product.category)}
-                
-                📅 **تاريخ الإضافة:** ${product.date || formatDate(new Date(product.createdAt))}
-                
-                ${product.deviceId === userDeviceId ? '\n✨ **هذا منتجك** - يمكنك حذفه' : ''}
-            `;
-            
-            if (confirm(`${message}\n\nهل تريد نسخ رقم التواصل؟`)) {
-                navigator.clipboard.writeText(product.contact)
-                    .then(() => showMessage('✅ تم نسخ رقم التواصل', 'success'))
-                    .catch(() => {
-                        const textarea = document.createElement('textarea');
-                        textarea.value = product.contact;
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                        showMessage('✅ تم نسخ رقم التواصل', 'success');
-                    });
-            }
-        };
-        
         window.deleteUserProduct = async function(productId, event) {
             event.stopPropagation();
             
@@ -1312,4 +1646,4 @@
         document.head.appendChild(style);
     </script>
 </body>
-</html>        
+</html>
